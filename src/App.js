@@ -1,23 +1,44 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from 'react';
+import firebase from "./firebase";
+
 
 function App() {
+  const [schools, setSchools] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const ref = firebase.firestore().collection("schools");
+
+  function getSchool() {
+    setLoading(true);
+    ref.onSnapshot((querySnapshot) => {
+      const items = [];
+      querySnapshot.forEach((doc) => {
+        items.push(doc.data());
+      });
+      setSchools(items);
+      setLoading(false);
+    })
+  }
+  useEffect(() => {
+    getSchool();
+  }, []);
+
+
+  if (loading) {
+    return <h1>Loadding...</h1>
+  }
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h1>Schools</h1>
+      {
+        schools.map((school) => (
+          <div key={school.id}>
+            <h2>{school.title}</h2>
+            <p>{school.desc}</p>
+          </div>
+        ))
+      }
     </div>
   );
 }
